@@ -1,0 +1,65 @@
+gpg_key:
+# k8s and docker
+  - https://packages.cloud.google.com/apt/doc/apt-key.gpg
+  - https://download.docker.com/linux/ubuntu/gpg
+
+repos:
+  # keep it up-to-date.
+  - deb https://download.docker.com/linux/ubuntu   focal stable
+  - deb https://apt.kubernetes.io/ kubernetes-xenial main
+
+# need to remove them.
+old_pkgs:
+  - docker 
+  - docker-engine 
+  - "docker.io"
+  - containerd 
+  - runc
+
+# need to install them.
+new_pkgs:
+  - kubeadm
+  - kubectl
+  - ca-certificates
+  - curl
+  - gnupg 
+  - lsb-release
+  - apt-transport-https
+  - ca-certificates
+  - curl
+  - docker-ce
+  - docker-ce-cli
+  - "containerd.io"
+  - ipvsadm
+  - conntrack
+  - kubelet
+
+file_target:
+  - source: docker-daemon.json
+    dest: /etc/docker/daemon.json
+
+  - source: k8s.conf
+    dest: /etc/sysctl.d/90-k8s.conf
+ 
+  - source: docker.service
+    dest: /usr/lib/systemd/system/docker.service 
+
+  - source: kubelet.service
+    dest: /usr/lib/systemd/system/kubelet.service 
+
+# docker pull image through proxy.
+#
+http_proxy: http://172.16.232.21:8088
+
+no_proxy:
+  - 10.96.0.0/12
+  - 172.16.232.234
+  - 172.16.234.200
+  - 172.16.232.201
+  - 172.16.232.202
+  - 172.16.232.21
+  - 172.16.215.0/24
+  - .xyz.com
+  - 10.244.0.0/16
+  - 127.0.0.1
+  

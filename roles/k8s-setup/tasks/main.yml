@@ -1,0 +1,68 @@
+---
+- name: Add Docker and K8s GPG apt Key
+  apt_key:
+    url: "{{ item }}"
+    state: present
+  loop: "{{ gpg_key }}"
+
+- name: Add Docker and k8s Repository
+  apt_repository:
+    repo: "{{ item }}"
+    state: present
+  loop: "{{ repos }}"
+
+- name: remove old packages
+  package:
+    name: "{{ item }}"
+    state: absent
+  loop: "{{ old_pkgs }}"
+
+  # package may not exist, so we have to ignore errors.
+  ignore_errors: true
+
+- name: install packages
+  package:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  loop: "{{ new_pkgs }}"
+ 
+- name: load ipvs module to use ipvs for kube-proxy.
+  shell: >-
+    modprobe -- ip_vs
+    modprobe -- ip_vs_rr
+    modprobe -- ip_vs_wrr
+    modprobe -- ip_vs_sh
+    modprobe -- nf_conntrack
+
+- name: sysctl.conf tweaks.
+  copy:
+    src: "{{ item.source }}"
+    dest: "{{ item.dest }}"
+    owner: root
+    group: root
+    mode: '0644'
+    backup: no
+  loop: "{{ file_target }}"
+
+- name: enable sysclt.conf and reload docker daemon
+  shell: >-
+    sysctl -p /etc/sysctl.d/90-k8s.conf; systemctl daemon-reload
+
+- name: create docker http proxy.
+  template:
+    src: docker.conf.j2
+    dest: /etc/default/docker
+    owner: root
+    group: root
+    mode: '0644'
+    backup: no
+
+- name: start and enable services
+  service:
+    name: "{{ item }}"
+    state: restarted
+    enabled: yes
+  loop: 
+    - docker 
+    - kubelet
