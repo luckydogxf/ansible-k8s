@@ -40,4 +40,4 @@ ansible_ssh_pass='XXXXXX'
 ansible-playbook -i hosts site.yml -b -u ubuntu
 ```
 4. Note
-User `ubuntu` may exist in target hosts and has `sudo` privileges.
+User `ubuntu` must exist in target hosts and has `sudo` privileges.
