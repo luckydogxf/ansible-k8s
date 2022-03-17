@@ -6,7 +6,7 @@ deploy k8s master and worker nodes automatically.
 ```
 ---
 - name: testing...
-  hosts: kea_dhcp
+  hosts: k8s
   gather_facts: yes
   ignore_errors: yes
   remote_user: ubuntu
@@ -33,7 +33,7 @@ ansible_ssh_pass='XXXXXX'
 
 [k8s]
 172.16.215.79
-
+172.16.215.77
 ```
 3. run it
 ```
